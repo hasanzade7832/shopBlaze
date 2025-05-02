@@ -1,0 +1,31 @@
+﻿@if (Visible)
+{
+    <div class="modal d-block" tabindex="-1" style="background-color:rgba(0,0,0,.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">@Title</h5>
+                    <button type="button" class="btn-close" @onclick="Cancel"></button>
+                </div>
+
+                <div class="modal-body">@Message</div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+                    <button class="btn btn-danger" @onclick="Confirm">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public string Title { get; set; } = "Confirm";
+    [Parameter] public string Message { get; set; } = "Are you sure?";
+    [Parameter] public EventCallback OnConfirmed { get; set; }
+    [Parameter] public EventCallback OnCancelled { get; set; }
+
+    private Task Confirm() => OnConfirmed.InvokeAsync();
+    private Task Cancel() => OnCancelled.InvokeAsync();
+}

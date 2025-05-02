@@ -1,0 +1,168 @@
+﻿@page "/category"
+@using kargardoon.Data
+@using kargardoon.Repository.IRepository
+@using kargardoon.Services
+@inject ICategoryRepository Repo
+@inject NotificationService Notifier
+
+<h3 class="text-center bg-dark text-white py-2 rounded">📋 Category List</h3>
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center py-5">
+        <div class="spinner-border text-primary"></div>
+    </div>
+}
+else
+{
+    <div class="container">
+
+        <!-- دکمهٔ افزودن -->
+        <div class="text-end mb-3">
+            <button class="btn btn-success" @onclick="ShowAddForm">
+                <i class="bi bi-plus-circle me-1"></i> Add Category
+            </button>
+        </div>
+
+        <!-- فرم افزودن / ویرایش -->
+        @if (showForm)
+        {
+            <EditForm Model="categoryModel" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="card p-3 mb-4 shadow-sm">
+                    <h5>@(categoryModel.Id == 0 ? "➕ Add Category" : "✏️ Edit Category")</h5>
+
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="categoryModel.Name"
+                                   id="catName" class="form-control" />
+                        <label for="catName">Name</label>
+                        <ValidationMessage For="@(() => categoryModel.Name)" />
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">
+                            @(categoryModel.Id == 0 ? "Save" : "Update")
+                        </button>
+                        <button class="btn btn-secondary" type="button" @onclick="HideForm">Cancel</button>
+                    </div>
+                </div>
+            </EditForm>
+        }
+
+        <!-- جدول -->
+        <table class="table table-striped table-bordered shadow-sm">
+            <thead class="table-dark text-center">
+                <tr><th>Name</th><th style="width:180px;">Actions</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Categories)
+                {
+                    <tr>
+                        <td>@c.Name</td>
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-sm me-2"
+                                    @onclick="() => EditCategory(c)">
+                                <i class="bi bi-pencil"></i> Edit
+                            </button>
+                            <button class="btn btn-danger btn-sm"
+                                    @onclick="() => PromptDelete(c.Id)">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- دیالوگ تایید حذف -->
+    <ConfirmDialog Visible="showConfirm"
+                   Title="Confirm Delete"
+                   Message="Do you really want to delete this category?"
+                   OnConfirmed="DeleteConfirmed"
+                   OnCancelled="CancelDelete" />
+}
+
+@code {
+    /* ---------- State ---------- */
+    private bool isLoading = true;
+    private bool showForm = false;
+    private bool showConfirm = false;
+
+    private List<Category> Categories = new();
+    private Category categoryModel = new();
+
+    private int deletingId;
+
+    /* ---------- Lifecycle ---------- */
+
+    // «وقتی صفحه ساخته میشه، Blazor میاد OnInitializedAsync() رو اجرا می‌کنه، و ما توش Load() رو صدا می‌زنیم تا از دیتابیس همه دسته‌ها رو بخونیم و نمایش بدیم.»
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await Load();
+    // }
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        isLoading = true;
+        Categories = (await Repo.GetAllAsync()).ToList();
+        isLoading = false;
+    }
+
+    /* ---------- CRUD ---------- */
+    private void ShowAddForm()
+    {
+        categoryModel = new();        // new Category()
+        showForm = true;
+    }
+
+    private void HideForm() => showForm = false;
+
+    private void EditCategory(Category c)
+    {
+        categoryModel = new Category { Id = c.Id, Name = c.Name };
+        showForm = true;
+    }
+
+    private async Task HandleSubmit()
+    {
+        bool isAdd = categoryModel.Id == 0;
+
+        if (isAdd)
+            await Repo.CreateAsync(categoryModel);
+        else
+            await Repo.UpdateAsync(categoryModel);
+
+        showForm = false;
+        await Load();   // جدول را تازه کن
+        Notifier.Notify(isAdd ? "Category added!" : "Category updated!",
+                        NotificationLevel.Success);
+    }
+
+    /* ---------- Delete flow ---------- */
+    private void PromptDelete(int id)
+    {
+        deletingId = id;
+        showConfirm = true;
+    }
+
+    private async Task DeleteConfirmed()
+    {
+        await Repo.DeleteAsync(deletingId);
+
+        showConfirm = false;
+        await Load();
+        Notifier.Notify("Category deleted!", NotificationLevel.Warning);
+    }
+
+    private void CancelDelete()
+    {
+        showConfirm = false;
+        Notifier.Notify("Deletion cancelled.", NotificationLevel.Info);
+    }
+}
