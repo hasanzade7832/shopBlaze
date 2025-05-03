@@ -1,0 +1,35 @@
+﻿@using kargardoon.Data
+@using Microsoft.AspNetCore.Components.Forms
+
+<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="card p-3 mb-4 shadow-sm">
+        <h5>@(Model.Id == 0 ? "➕ Add Category" : "✏️ Edit Category")</h5>
+
+        <div class="form-floating mb-3">
+            <InputText @bind-Value="Model.Name"
+                       id="catName"
+                       class="form-control" />
+            <label for="catName">Name</label>
+            <ValidationMessage For="@(() => Model.Name)" />
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">
+                @(Model.Id == 0 ? "Save" : "Update")
+            </button>
+            <button class="btn btn-secondary" type="button"
+                    @onclick="OnCancel">
+                Cancel
+            </button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public Category Model { get; set; } = new();
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+}
