@@ -1,0 +1,39 @@
+﻿@page "/product"
+@using kargardoon.Data
+@using kargardoon.Services
+@inject ProductCrudManager Manager
+@inject ICategoryRepository CatRepo
+@inject NotificationService Notifier
+
+<h3 class="text-center bg-dark text-white py-2 rounded">📦 Product List</h3>
+
+@if (isLoading)
+{
+    <Spinner />
+}
+else
+{
+    <div class="container mb-3 text-end">
+        <button class="btn btn-success" @onclick="ShowAddForm">
+            <i class="bi bi-plus-circle me-1"></i> Add New Product
+        </button>
+    </div>
+
+    @if (showForm)
+    {
+        <ProductForm Model="productModel"
+                     Categories="categories"
+                     OnValidSubmit="HandleSubmit"
+                     OnCancel="HideForm" />
+    }
+
+    <ProductTable Items="products"
+                  OnEdit="EditProduct"
+                  OnDelete="PromptDelete" />
+
+    <ConfirmDialog Visible="showConfirm"
+                   Title="Confirm Delete"
+                   Message="Are you sure you want to delete this product?"
+                   OnConfirmed="DeleteConfirmed"
+                   OnCancelled="CancelDelete" />
+}

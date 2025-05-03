@@ -1,0 +1,77 @@
+﻿@using kargardoon.Data
+@using Microsoft.AspNetCore.Components.Forms
+
+<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="card p-3 mb-4 shadow-sm">
+        <h5>@(Model.Id == 0 ? "➕ Add Product" : "✏️ Update Product")</h5>
+
+        <div class="form-floating mb-3">
+            <InputText @bind-Value="Model.Name" class="form-control" id="prodName" />
+            <label for="prodName">Name</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <InputText @bind-Value="Model.Description" class="form-control" id="prodDesc" />
+            <label for="prodDesc">Description</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <InputText @bind-Value="Model.SpecialTag" class="form-control" id="prodTag" />
+            <label for="prodTag">Special Tag</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <InputNumber @bind-Value="Model.Price" class="form-control" id="prodPrice" />
+            <label for="prodPrice">Price</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select class="form-select" @bind="Model.CategoryId">
+                <option disabled value="0">-- Select Category --</option>
+                @foreach (var cat in Categories)
+                {
+                    <option value="@cat.Id">@cat.Name</option>
+                }
+            </select>
+            <label>Category</label>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <div class="mb-2">
+                <img src="@Model.ImageUrl" style="max-width: 200px;" class="img-thumbnail" />
+                <button class="btn btn-outline-danger btn-sm mt-2" @onclick="() => Model.ImageUrl = string.Empty">
+                    <i class="bi bi-trash"></i> Remove
+                </button>
+            </div>
+        }
+
+        <div class="mb-3">
+            <InputFile OnChange="HandleImageUpload" />
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">@(Model.Id == 0 ? "Save" : "Update")</button>
+            <button class="btn btn-secondary" type="button" @onclick="OnCancel">Cancel</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public Product Model { get; set; } = new();
+    [Parameter] public List<Category> Categories { get; set; } = new();
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        // فقط شبیه‌سازی: فرض می‌کنیم URL ذخیره شد
+        var newUrl = $"/images/{file.Name}";
+        Model.ImageUrl = newUrl;
+        await Task.CompletedTask;
+    }
+}
