@@ -69,9 +69,16 @@
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
         var file = e.File;
-        // فقط شبیه‌سازی: فرض می‌کنیم URL ذخیره شد
-        var newUrl = $"/images/{file.Name}";
-        Model.ImageUrl = newUrl;
-        await Task.CompletedTask;
+        var fileName = $"{Guid.NewGuid()}_{file.Name}";
+        var filePath = Path.Combine("wwwroot/images", fileName);
+
+        // ذخیره فایل فیزیکی در wwwroot/images
+        var stream = file.OpenReadStream(maxAllowedSize: 5_000_000); // 5MB max
+        using var fileStream = new FileStream(filePath, FileMode.Create);
+        await stream.CopyToAsync(fileStream);
+
+        // مسیر نسبی برای نمایش در مرورگر
+        Model.ImageUrl = $"/images/{fileName}";
     }
+
 }
