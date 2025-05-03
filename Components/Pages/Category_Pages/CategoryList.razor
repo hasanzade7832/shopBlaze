@@ -1,9 +1,10 @@
 ﻿@page "/category"
 @using kargardoon.Data
 @using kargardoon.Repository.IRepository
-@using kargardoon.Services
-@inject ICategoryRepository Repo
+@* @using kargardoon.Services *@
 @inject NotificationService Notifier
+@inject CategoryCrudManager Manager
+
 
 <h3 class="text-center bg-dark text-white py-2 rounded">📋 Category List</h3>
 
@@ -86,38 +87,26 @@ else
 }
 
 @code {
-    /* ---------- State ---------- */
     private bool isLoading = true;
     private bool showForm = false;
     private bool showConfirm = false;
 
     private List<Category> Categories = new();
     private Category categoryModel = new();
-
     private int deletingId;
-
-    /* ---------- Lifecycle ---------- */
-
-    // «وقتی صفحه ساخته میشه، Blazor میاد OnInitializedAsync() رو اجرا می‌کنه، و ما توش Load() رو صدا می‌زنیم تا از دیتابیس همه دسته‌ها رو بخونیم و نمایش بدیم.»
-
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     await Load();
-    // }
 
     protected override async Task OnInitializedAsync() => await Load();
 
     private async Task Load()
     {
         isLoading = true;
-        Categories = (await Repo.GetAllAsync()).ToList();
+        Categories = await Manager.LoadCategoriesAsync();
         isLoading = false;
     }
 
-    /* ---------- CRUD ---------- */
     private void ShowAddForm()
     {
-        categoryModel = new();        // new Category()
+        categoryModel = new();
         showForm = true;
     }
 
@@ -131,20 +120,11 @@ else
 
     private async Task HandleSubmit()
     {
-        bool isAdd = categoryModel.Id == 0;
-
-        if (isAdd)
-            await Repo.CreateAsync(categoryModel);
-        else
-            await Repo.UpdateAsync(categoryModel);
-
+        await Manager.SaveAsync(categoryModel);
         showForm = false;
-        await Load();   // جدول را تازه کن
-        Notifier.Notify(isAdd ? "Category added!" : "Category updated!",
-                        NotificationLevel.Success);
+        await Load();
     }
 
-    /* ---------- Delete flow ---------- */
     private void PromptDelete(int id)
     {
         deletingId = id;
@@ -153,16 +133,15 @@ else
 
     private async Task DeleteConfirmed()
     {
-        await Repo.DeleteAsync(deletingId);
-
+        await Manager.DeleteAsync(deletingId);
         showConfirm = false;
         await Load();
-        Notifier.Notify("Category deleted!", NotificationLevel.Warning);
     }
 
     private void CancelDelete()
     {
         showConfirm = false;
-        Notifier.Notify("Deletion cancelled.", NotificationLevel.Info);
+        Manager.NotifyCancelDelete();
     }
 }
+
