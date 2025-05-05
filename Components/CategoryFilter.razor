@@ -1,0 +1,18 @@
+﻿<div class="container mb-4 text-center">
+    <div class="btn-group" role="group">
+        @foreach (var cat in Categories)
+        {
+            <button type="button"
+                    class="btn @(SelectedCategory==cat ? "btn-success" : "btn-outline-secondary")"
+                    @onclick="() => OnCategoryChanged.InvokeAsync(cat)">
+                @cat
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string SelectedCategory { get; set; }
+    [Parameter] public EventCallback<string> OnCategoryChanged { get; set; }
+    private string[] Categories = new[] { "All", "Appetizer", "Entree", "Dessert" };
+}

@@ -1,23 +1,29 @@
 ﻿@inherits LayoutComponentBase
+@using kargardoon.Data
+@using kargardoon.Components.Shared
 
 <div class="page">
-    <div class="sidebar">
+    <!-- ✅ نوار کناری -->
+    <div class="sidebar bg-light border-end p-3">
         <NavMenu />
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+    <!-- ✅ محتوای اصلی -->
+    <main class="overflow-hidden">
+        <!-- ✅ هدر سراسری سایت -->
+        <Header />
 
-        <article class="content px-4">
+        <!-- ✅ محتوای پویا صفحه -->
+        <article class="content px-4 py-3">
             @Body
         </article>
     </main>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
+<!-- ✅ پیام خطا -->
+<div id="blazor-error-ui" data-nosnippet class="alert alert-danger fixed-bottom m-0 rounded-0 text-center">
+    <i class="bi bi-exclamation-triangle-fill me-1"></i>
     An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <a href="." class="reload text-white text-decoration-underline ms-2">Reload</a>
+    <span class="dismiss ms-3" role="button">🗙</span>
 </div>

@@ -9,7 +9,7 @@
 
 @if (isLoading)
 {
-    <Spinner />
+    <AppSpinner />
 }
 else
 {
@@ -31,7 +31,7 @@ else
                   OnEdit="EditProduct"
                   OnDelete="PromptDelete" />
 
-    <ConfirmDialog Visible="showConfirm"
+    <AppConfirmDialog Visible="showConfirm"
                    Title="Confirm Delete"
                    Message="Are you sure you want to delete this product?"
                    OnConfirmed="DeleteConfirmed"

@@ -1,0 +1,75 @@
+﻿@* Components/Shared/Header.razor *@
+@using Microsoft.AspNetCore.Components.Routing
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+        <!-- برند با لوگو تصادفی -->
+        <NavLink class="navbar-brand d-flex align-items-center" href="/">
+            <img src="@LogoUrl"
+                 width="36" height="36"
+                 class="rounded-circle border border-light me-2 shadow-sm"
+                 alt="Kargardoon Logo" />
+            <span class="fw-bold">Kargardoon</span>
+        </NavLink>
+
+        <!-- دکمه‌ی موبایل -->
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainNavbar"
+                aria-controls="mainNavbar"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- لینک‌ها -->
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <NavLink href="/"
+                             class="nav-link"
+                             activeclassname="active">
+                        Home
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink href="/cart"
+                             class="nav-link"
+                             activeclassname="active">
+                        Cart (0)
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink href="/orders"
+                             class="nav-link"
+                             activeclassname="active">
+                        Order List
+                    </NavLink>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <NavLink href="/register"
+                             class="nav-link"
+                             activeclassname="active">
+                        Register
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink href="/login"
+                             class="nav-link"
+                             activeclassname="active">
+                        Login
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@code {
+    // تولید یک URL تصادفی برای لوگو
+    private string LogoUrl { get; set; } = $"https://picsum.photos/40/40?random={Guid.NewGuid()}";
+}

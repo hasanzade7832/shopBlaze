@@ -1,7 +1,37 @@
 ﻿@page "/"
+@using kargardoon.Data
+@using kargardoon.Components.Shared
 
-<PageTitle>Home</PageTitle>
+<HeroSearch />
 
-<h1>Hello, world!</h1>
+<CategoryFilter SelectedCategory="@selectedCategory" OnCategoryChanged="UpdateCategory" />
 
-Welcome to your new app.
+<div class="container">
+    <div class="row g-4">
+        @foreach (var p in FilteredProducts)
+        {
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <ProductCard Product="p" />
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string selectedCategory = "All";
+
+    private List<Product> allProducts = new()
+    {
+        new(){ Name="Spring Rolls", Price=10.99, SpecialTag="Hot", ImageUrl="https://picsum.photos/id/101/300/200", CategoryId=1, Category=new Category{Id=1,Name="Appetizer"} },
+        new(){ Name="Paneer Curry", Price=15.99, SpecialTag="Veg", ImageUrl="https://picsum.photos/id/102/300/200", CategoryId=2, Category=new Category{Id=2,Name="Entree"} },
+        new(){ Name="Ice Cream", Price=7.99, SpecialTag="Best Seller", ImageUrl="https://picsum.photos/id/103/300/200", CategoryId=3, Category=new Category{Id=3,Name="Dessert"} },
+        new(){ Name="Burger", Price=12.50, SpecialTag="Beef", ImageUrl="https://picsum.photos/id/104/300/200", CategoryId=2, Category=new Category{Id=2,Name="Entree"} }
+    };
+
+    private IEnumerable<Product> FilteredProducts =>
+        selectedCategory == "All"
+            ? allProducts
+            : allProducts.Where(x => x.Category.Name == selectedCategory);
+
+    private void UpdateCategory(string cat) => selectedCategory = cat;
+}

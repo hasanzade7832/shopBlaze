@@ -1,5 +1,7 @@
-html, body {
+﻿html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 a, .btn-link {
@@ -58,3 +60,14 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* Hover effect برای کارت‌ها */
+.hover-card {
+    transition: transform .2s ease, box-shadow .2s ease;
+    cursor: pointer;
+}
+
+    .hover-card:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    }

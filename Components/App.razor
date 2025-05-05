@@ -1,32 +1,44 @@
-﻿<!DOCTYPE html>
+﻿@using BlazorBootstrap
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet"
-          href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
-    <!-- Site CSS -->
+    <!-- ✅ Bootstrap CSS (با Assets) -->
+    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+
+    <!-- ✅ CSS های پروژه -->
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["kargardoon.styles.css"]" />
 
-    <ImportMap />
+    <!-- ✅ Font Awesome (آفلاین از wwwroot/lib/fontawesome) -->
+    <link rel="stylesheet" href="lib/fontawesome/css/all.min.css" />
+
+    <!-- ✅ Bootstrap Icons (آفلاین از wwwroot/lib/bootstrap-icons) -->
+    <link rel="stylesheet" href="lib/bootstrap-icons/bootstrap-icons.css" />
+
+    <!-- ✅ آیکون تب مرورگر -->
     <link rel="icon" type="image/png" href="favicon.png" />
+
+    <!-- ✅ ImportMap و Blazor HeadOutlet -->
+    <ImportMap />
     <HeadOutlet @rendermode="PageRenderMode" />
 </head>
 
 <body>
-    <!-- 🔹 Toastها به صورت تعاملی -->
+    <!-- ✅ اعلان‌ها (Toast) -->
     <Notification @rendermode="InteractiveServer" />
 
-    <!-- مسیریابی -->
+    <!-- ✅ مسیرهای Blazor -->
     <Routes @rendermode="PageRenderMode" />
 
-    <!-- Bootstrap JS -->
+    <!-- ✅ Bootstrap JavaScript -->
     <script src="lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Blazor Server -->
+
+    <!-- ✅ Blazor Server Runtime -->
     <script src="_framework/blazor.server.js"></script>
 </body>
 </html>

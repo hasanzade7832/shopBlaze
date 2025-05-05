@@ -8,7 +8,7 @@
 
 @if (isLoading)
 {
-    <Spinner />
+    <AppSpinner />
 }
 else
 {
@@ -29,7 +29,7 @@ else
                    OnEdit="EditCategory"
                    OnDelete="PromptDelete" />
 
-    <ConfirmDialog Visible="showConfirm"
+    <AppConfirmDialog Visible="showConfirm"
                    Title="Confirm Delete"
                    Message="Do you really want to delete this category?"
                    OnConfirmed="DeleteConfirmed"
