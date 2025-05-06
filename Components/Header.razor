@@ -1,9 +1,13 @@
-﻿@* Components/Shared/Header.razor *@
-@using Microsoft.AspNetCore.Components.Routing
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject AuthenticationStateProvider _authProvider
+@inject NavigationManager _navigation
+@inject IShoppingCartRepository _cartRepository
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
-        <!-- برند با لوگو تصادفی -->
+        <!-- لوگو و برند -->
         <NavLink class="navbar-brand d-flex align-items-center" href="/">
             <img src="@LogoUrl"
                  width="36" height="36"
@@ -12,64 +16,86 @@
             <span class="fw-bold">Kargardoon</span>
         </NavLink>
 
-        <!-- دکمه‌ی موبایل -->
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mainNavbar"
-                aria-controls="mainNavbar"
-                aria-expanded="false"
-                aria-label="Toggle navigation">
+        <!-- دکمه موبایل -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- لینک‌ها -->
+        <!-- منو -->
         <div class="collapse navbar-collapse" id="mainNavbar">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <NavLink href="/"
-                             class="nav-link"
-                             activeclassname="active">
-                        Home
+                    <NavLink href="/" class="nav-link" activeclassname="active">Home</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink href="/cart" class="nav-link" activeclassname="active">
+                        Cart (@CartCountDisplay)
                     </NavLink>
                 </li>
                 <li class="nav-item">
-                    <NavLink href="/cart"
-                             class="nav-link"
-                             activeclassname="active">
-                        Cart (0)
-                    </NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink href="/orders"
-                             class="nav-link"
-                             activeclassname="active">
-                        Order List
-                    </NavLink>
+                    <NavLink href="/orders" class="nav-link" activeclassname="active">Order List</NavLink>
                 </li>
             </ul>
 
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <NavLink href="/register"
-                             class="nav-link"
-                             activeclassname="active">
-                        Register
-                    </NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink href="/login"
-                             class="nav-link"
-                             activeclassname="active">
-                        Login
-                    </NavLink>
-                </li>
+            <!-- سمت راست -->
+            <ul class="navbar-nav ms-auto">
+                @if (IsLoggedIn)
+                {
+                    <li class="nav-item text-white-50 mt-2 me-2">
+                        👤 @UserEmail
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="" @onclick="Logout">Logout</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <NavLink href="/register" class="nav-link" activeclassname="active">Register</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink href="/login" class="nav-link" activeclassname="active">Login</NavLink>
+                    </li>
+                }
             </ul>
         </div>
     </div>
 </nav>
 
 @code {
-    // تولید یک URL تصادفی برای لوگو
-    private string LogoUrl { get; set; } = $"https://picsum.photos/40/40?random={Guid.NewGuid()}";
+    private string LogoUrl = $"https://picsum.photos/40/40?random={Guid.NewGuid()}";
+    private bool IsLoggedIn = false;
+    private string UserEmail = "";
+    private int CartCount = 0;
+
+    private string CartCountDisplay => CartCount > 0 ? CartCount.ToString() : "0";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            IsLoggedIn = true;
+            UserEmail = user.Identity.Name ?? user.FindFirst(ClaimTypes.Email)?.Value ?? "";
+
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var cartItems = await _cartRepository.GetAllAsync(userId);
+                CartCount = cartItems.Sum(i => i.Count);
+            }
+        }
+    }
+
+    private async Task Logout()
+    {
+        IsLoggedIn = false;
+        CartCount = 0;
+        UserEmail = "";
+
+        // ری‌دایرکت به صفحه خروج
+        _navigation.NavigateTo("/Identity/Account/Logout", forceLoad: true);
+    }
 }
