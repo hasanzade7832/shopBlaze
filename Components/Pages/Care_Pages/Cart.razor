@@ -1,0 +1,71 @@
+﻿@page "/cart"
+@attribute [Authorize]
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using kargardoon.Data
+@inject IShoppingCartRepository _cartRepository
+@inject AuthenticationStateProvider _authProvider
+
+<h3 class="text-center text-primary mt-4">🛒 Your Shopping Cart</h3>
+
+@if (isProcessing)
+{
+    <div class="text-center mt-5">
+        <img src="/images/loading.gif" alt="loading" />
+    </div>
+}
+else if (!ShoppingCartItems.Any())
+{
+    <p class="text-muted text-center mt-4">🛍️ Your cart is empty.</p>
+}
+else
+{
+    <div class="container mt-3">
+        @foreach (var item in ShoppingCartItems)
+        {
+            <div class="card mb-3 shadow">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="@item.Product.ImageUrl" class="img-fluid rounded-start" alt="@item.Product.Name" />
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Product.Name</h5>
+                            <p class="card-text">💲 Price: <strong>@item.Product.Price</strong></p>
+                            <p class="card-text">🔢 Quantity: <strong>@item.Count</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private bool isProcessing = true;
+
+    private IEnumerable<ShoppingCart> ShoppingCartItems = Enumerable.Empty<ShoppingCart>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadCart();
+        }
+    }
+
+    private async Task LoadCart()
+    {
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            ShoppingCartItems = await _cartRepository.GetAllAsync(userId);
+        }
+
+        isProcessing = false;
+        StateHasChanged();
+    }
+}

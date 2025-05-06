@@ -1,8 +1,22 @@
 ﻿html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
     max-width: 100%;
+    overflow-y: auto;
 }
+
+body {
+    padding-bottom: 0 !important;
+}
+
+.content {
+    padding-top: 1.1rem;
+}
+
+/* بقیه استایل‌ها مثل hover-card, validation-message و ... رو دست نزن */
+
 
 a, .btn-link {
     color: #006bb7;

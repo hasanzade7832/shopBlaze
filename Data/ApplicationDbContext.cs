@@ -12,6 +12,8 @@ namespace kargardoon.Data
 
         public DbSet<Category> Category { get; set; }
         public DbSet<Product> Product { get; set; }
+        public DbSet<ShoppingCart> ShoppingCart { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder); 

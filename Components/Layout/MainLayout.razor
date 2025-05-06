@@ -3,24 +3,19 @@
 @using kargardoon.Components.Shared
 
 <div class="page">
-    <!-- ✅ نوار کناری -->
     <div class="sidebar bg-light border-end p-3">
         <NavMenu />
     </div>
 
-    <!-- ✅ محتوای اصلی -->
-    <main class="overflow-hidden">
-        <!-- ✅ هدر سراسری سایت -->
+    <main class="overflow-auto">
         <Header />
 
-        <!-- ✅ محتوای پویا صفحه -->
         <article class="content px-4 py-3">
             @Body
         </article>
     </main>
 </div>
 
-<!-- ✅ پیام خطا -->
 <div id="blazor-error-ui" data-nosnippet class="alert alert-danger fixed-bottom m-0 rounded-0 text-center">
     <i class="bi bi-exclamation-triangle-fill me-1"></i>
     An unhandled error has occurred.

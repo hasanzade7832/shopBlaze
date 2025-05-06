@@ -1,17 +1,33 @@
 ﻿@page "/"
 @using kargardoon.Data
 @using kargardoon.Components.Shared
+@using System.Security.Claims
+@inject AuthenticationStateProvider _authProvider
+@inject NavigationManager _navigation
+@inject IShoppingCartRepository _cartRepository
 
 <HeroSearch />
 
 <CategoryFilter SelectedCategory="@selectedCategory" OnCategoryChanged="UpdateCategory" />
 
-<div class="container">
+<div class="container pb-5">
     <div class="row g-4">
         @foreach (var p in FilteredProducts)
         {
             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                <ProductCard Product="p" />
+                <div class="card h-100 shadow-sm">
+                    <img class="card-img-top img-thumbnail img-rounded w-100" src="@p.ImageUrl" alt="@p.Name" />
+
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-success">@p.Name</h5>
+                        <p class="card-text text-muted">@p.Description</p>
+                        <p class="fw-bold text-primary mb-2">$@p.Price</p>
+
+                        <button class="btn btn-success w-100" @onclick="() => AddToCart(p)">
+                            <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
             </div>
         }
     </div>
@@ -22,16 +38,45 @@
 
     private List<Product> allProducts = new()
     {
-        new(){ Name="Spring Rolls", Price=10.99, SpecialTag="Hot", ImageUrl="https://picsum.photos/id/101/300/200", CategoryId=1, Category=new Category{Id=1,Name="Appetizer"} },
-        new(){ Name="Paneer Curry", Price=15.99, SpecialTag="Veg", ImageUrl="https://picsum.photos/id/102/300/200", CategoryId=2, Category=new Category{Id=2,Name="Entree"} },
-        new(){ Name="Ice Cream", Price=7.99, SpecialTag="Best Seller", ImageUrl="https://picsum.photos/id/103/300/200", CategoryId=3, Category=new Category{Id=3,Name="Dessert"} },
-        new(){ Name="Burger", Price=12.50, SpecialTag="Beef", ImageUrl="https://picsum.photos/id/104/300/200", CategoryId=2, Category=new Category{Id=2,Name="Entree"} }
+        new(){ Id=1, Name="Spring Rolls", Price=10.99, SpecialTag="Hot", ImageUrl="https://picsum.photos/id/101/300/200", CategoryId=1, Category=new Category{Id=1,Name="Appetizer"} },
+        new(){ Id=2, Name="Paneer Curry", Price=15.99, SpecialTag="Veg", ImageUrl="https://picsum.photos/id/102/300/200", CategoryId=2, Category=new Category{Id=2,Name="Entree"} },
+        new(){ Id=3, Name="Ice Cream", Price=7.99, SpecialTag="Best Seller", ImageUrl="https://picsum.photos/id/103/300/200", CategoryId=3, Category=new Category{Id=3,Name="Dessert"} },
+        new(){ Id=4, Name="Burger", Price=12.50, SpecialTag="Beef", ImageUrl="https://picsum.photos/id/104/300/200", CategoryId=2, Category=new Category{Id=2,Name="Entree"} }
     };
 
     private IEnumerable<Product> FilteredProducts =>
         selectedCategory == "All"
             ? allProducts
-            : allProducts.Where(x => x.Category.Name == selectedCategory);
+            : allProducts.Where(x => x.Category?.Name == selectedCategory);
 
     private void UpdateCategory(string cat) => selectedCategory = cat;
+
+    private async Task AddToCart(Product product)
+    {
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity == null || !user.Identity.IsAuthenticated)
+        {
+            _navigation.NavigateTo("/Account/Login", forceLoad: true);
+            return;
+        }
+
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            _navigation.NavigateTo("/Account/Login");
+            return;
+        }
+
+        var result = await _cartRepository.UpdateCartAsync(userId, product.Id, 1);
+        if (!result)
+        {
+            Console.WriteLine("❌ Failed to add to cart.");
+        }
+        else
+        {
+            Console.WriteLine("✅ Product added to cart.");
+        }
+    }
 }
