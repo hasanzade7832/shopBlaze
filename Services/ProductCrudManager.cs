@@ -16,7 +16,8 @@ namespace kargardoon.Services
 
         public async Task<List<Product>> LoadProductsAsync()
         {
-            return (await _repo.GetAllAsync()).ToList();
+            var result = await _repo.GetAllAsync(); // ✅ استفاده امن از EF با DbContextFactory
+            return result.ToList();
         }
 
         public async Task<bool> SaveAsync(Product product)

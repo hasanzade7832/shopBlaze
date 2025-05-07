@@ -75,13 +75,11 @@ h1:focus {
     text-align: start;
 }
 
-/* Hover effect برای کارت‌ها */
 .hover-card {
-    transition: transform .2s ease, box-shadow .2s ease;
-    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
     .hover-card:hover {
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
     }

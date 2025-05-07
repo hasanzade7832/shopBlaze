@@ -6,55 +6,56 @@ namespace kargardoon.Repository
 {
     public class ProductRepository : IProductRepository
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbFactory;
 
-        public ProductRepository(ApplicationDbContext db)
+        public ProductRepository(IDbContextFactory<ApplicationDbContext> dbFactory)
         {
-            _db = db;
+            _dbFactory = dbFactory;
+        }
+
+        public async Task<IEnumerable<Product>> GetAllAsync()
+        {
+            using var db = _dbFactory.CreateDbContext();
+
+            return await db.Product
+                .Include(p => p.Category)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<Product> GetAsync(int id)
+        {
+            using var db = _dbFactory.CreateDbContext();
+
+            return await db.Product
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(u => u.Id == id) ?? new Product();
         }
 
         public async Task<Product> CreateAsync(Product obj)
         {
-            _db.Product.Add(obj);
-            await _db.SaveChangesAsync();
+            using var db = _dbFactory.CreateDbContext();
+            db.Product.Add(obj);
+            await db.SaveChangesAsync();
             return obj;
         }
 
         public async Task<Product> UpdateAsync(Product obj)
         {
-            var objFromDb = await _db.Product.FirstOrDefaultAsync(u => u.Id == obj.Id);
-            if (objFromDb == null) return obj;
-
-            objFromDb.Name = obj.Name;
-            objFromDb.Description = obj.Description;
-            objFromDb.Price = obj.Price;
-            objFromDb.SpecialTag = obj.SpecialTag;
-            objFromDb.CategoryId = obj.CategoryId;
-            objFromDb.ImageUrl = obj.ImageUrl;
-
-            await _db.SaveChangesAsync();
-            return objFromDb;
+            using var db = _dbFactory.CreateDbContext();
+            db.Product.Update(obj);
+            await db.SaveChangesAsync();
+            return obj;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var obj = await _db.Product.FirstOrDefaultAsync(u => u.Id == id);
+            using var db = _dbFactory.CreateDbContext();
+            var obj = await db.Product.FindAsync(id);
             if (obj == null) return false;
 
-            _db.Product.Remove(obj);
-            return await _db.SaveChangesAsync() > 0;
-        }
-
-        public async Task<Product> GetAsync(int id)
-        {
-            return await _db.Product
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(u => u.Id == id) ?? new Product();
-        }
-
-        public async Task<IEnumerable<Product>> GetAllAsync()
-        {
-            return await _db.Product.Include(p => p.Category).ToListAsync();
+            db.Product.Remove(obj);
+            return await db.SaveChangesAsync() > 0;
         }
     }
 }
